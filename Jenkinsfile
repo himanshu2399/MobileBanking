@@ -8,9 +8,6 @@ pipeline {
     }
     stages {
         stage('Build') {
-            when { 
-                equals("${FOLDER}", "dev-values")
-            }
             steps {
                 echo "Building on the branch {$BRANCH}"
                 echo "Building on the Folder {$FOLDER}"
