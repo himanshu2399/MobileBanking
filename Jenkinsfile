@@ -13,6 +13,9 @@ pipeline {
                     if (CHANGED_FILES.contains('uat-values/')) {
                         build job: 'uat-values'
                     }
+                    if (CHANGED_FILES.contains('dev-values/')) {
+                        build job: 'dev-values'
+                    }
                 }
             }
         }
