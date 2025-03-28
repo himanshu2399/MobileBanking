@@ -24,7 +24,7 @@ pipeline {
                         build job: 'uat-pipeline'
                     } else if (changedFiles.find { it.startsWith('dev-values/') }) {
                         echo "Triggering DEV pipeline..."
-                        build job: 'dev-values1'
+                        build job: 'dev-pipeline'
                     }
                 }
             }
