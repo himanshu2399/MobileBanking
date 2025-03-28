@@ -16,7 +16,7 @@ pipeline {
                     } else if (changedFiles.any { it.startsWith('uat-values/') }) {
                         build job: 'uat-pipeline'
                     } else if (changedFiles.any { it.startsWith('dev-values/') }) {
-                        build job: 'dev-pipeline'
+                        build job: 'dev-values1'
                     }
                 }
             }
