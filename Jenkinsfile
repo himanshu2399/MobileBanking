@@ -23,7 +23,7 @@ pipeline {
                     // Run only required pipelines
                     def jobsToRun = []
                     if (triggerDev) {
-                        jobsToRun << 'dev-values1'
+                        jobsToRun << 'dev-pipeline'
                     }
                     if (triggerSit) {
                         jobsToRun << 'sit-pipeline'
