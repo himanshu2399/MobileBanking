@@ -2,46 +2,43 @@ pipeline {
     agent any
 
     stages {
-        stage('Check Execution') {
+        stage('Checkout') {
             steps {
-                echo "Jenkinsfile is being executed!"
+                checkout scm
             }
         }
 
-        stage('Check Folder Changes') {
+        stage('Detect Folder Changes') {
             steps {
                 script {
-                    // Fetch changed files as a list
+                    // Get list of changed files
                     def changedFiles = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim().split("\n")
-                    echo "Changed files: ${changedFiles}"
+                    echo "Changed Files: ${changedFiles}"
 
-                    // Use a Set to ensure a job triggers only once
-                    def jobsToTrigger = [] as Set
+                    // Flags to control job triggers
+                    def triggerDev = changedFiles.any { it.startsWith('dev-values/') }
+                    def triggerSit = changedFiles.any { it.startsWith('sit-values/') }
+                    def triggerUat = changedFiles.any { it.startsWith('uat-values/') }
 
-                    // Check changes and add jobs to the Set (avoids duplicate triggers)
-                    if (changedFiles.find { it.startsWith('sit-values/') }) {
-                        jobsToTrigger.add('sit-pipeline')
+                    // Trigger respective jobs only once
+                    if (triggerDev) {
+                        echo "Triggering Dev Pipeline..."
+                        build job: 'dev-pipeline'
                     }
-                    if (changedFiles.find { it.startsWith('uat-values/') }) {
-                        jobsToTrigger.add('uat-pipeline')
+                    if (triggerSit) {
+                        echo "Triggering SIT Pipeline..."
+                        build job: 'sit-pipeline'
                     }
-                    if (changedFiles.find { it.startsWith('dev-values/') }) {
-                        jobsToTrigger.add('dev-pipeline')
+                    if (triggerUat) {
+                        echo "Triggering UAT Pipeline..."
+                        build job: 'uat-pipeline'
                     }
 
-                    // Trigger each job only once
-                    jobsToTrigger.each { job ->
-                        echo "Triggering job: ${job}"
-                        build job: job
+                    // If no folder change detected
+                    if (!triggerDev && !triggerSit && !triggerUat) {
+                        echo "No folder-specific changes detected. No pipeline triggered."
                     }
                 }
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo "Starting the build process..."
-                // Add your build commands here
             }
         }
     }
