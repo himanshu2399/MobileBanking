@@ -16,15 +16,15 @@ pipeline {
                     echo "Changed files: ${changedFiles}"
 
                     // Trigger pipelines based on folder changes
-                    if (changedFiles.any { it.startsWith('sit-values/') }) {
+                      if (changedFiles.any { it.startsWith('sit-values/') }) {
                         echo "Triggering SIT pipeline..."
                         build job: 'sit-pipeline'
                     } 
-                    if (changedFiles.any { it.startsWith('uat-values/') }) {
+                   else if (changedFiles.any { it.startsWith('uat-values/') }) {
                         echo "Triggering UAT pipeline..."
                         build job: 'uat-pipeline'
                     } 
-                    if (changedFiles.any { it.startsWith('dev-values/') }) {
+                    else if (changedFiles.any { it.startsWith('dev-values/') }) {
                         echo "Triggering DEV pipeline..."
                         build job: 'dev-values1'
                     }
