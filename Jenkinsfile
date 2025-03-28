@@ -10,7 +10,9 @@ pipeline {
         stage('Check Folder Changes') {
             steps {
                 script {
-                    def changedFiles = sh(script: "git diff --name-only HEAD~1", returnStdout: true).trim().split("\n")   
+                    def changeFiles = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim()
+                    echo "Changed files: ${changeFiles}"  
+                    
                     if (changedFiles.any { it.startsWith('sit-values/') }) {
                         build job: 'sit-pipeline'
                     } else if (changedFiles.any { it.startsWith('uat-values/') }) {
