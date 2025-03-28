@@ -11,20 +11,25 @@ pipeline {
         stage('Check Folder Changes') {
             steps {
                 script {
-                    // Fetch changed files
+                    // Fetch changed files and convert to a list
                     def changedFiles = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim().split("\n")
                     echo "Changed files: ${changedFiles}"
 
-                    // Trigger only one pipeline (first match)
+                    // Determine which job to trigger
+                    def jobToTrigger = null
+
                     if (changedFiles.find { it.startsWith('sit-values/') }) {
-                        echo "Triggering SIT pipeline..."
-                        build job: 'sit-pipeline'
+                        jobToTrigger = 'sit-pipeline'
                     } else if (changedFiles.find { it.startsWith('uat-values/') }) {
-                        echo "Triggering UAT pipeline..."
-                        build job: 'uat-pipeline'
+                        jobToTrigger = 'uat-pipeline'
                     } else if (changedFiles.find { it.startsWith('dev-values/') }) {
-                        echo "Triggering DEV pipeline..."
-                        build job: 'dev-pipeline'
+                        jobToTrigger = 'dev-pipeline'
+                    }
+
+                    // Trigger only one job
+                    if (jobToTrigger) {
+                        echo "Triggering job: ${jobToTrigger}"
+                        build job: jobToTrigger
                     }
                 }
             }
