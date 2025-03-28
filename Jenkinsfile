@@ -20,23 +20,25 @@ pipeline {
                     def triggerSit = changedFiles.any { it.startsWith('sit-values/') }
                     def triggerUat = changedFiles.any { it.startsWith('uat-values/') }
 
-                    // Trigger respective jobs only once
+                    // Run only required pipelines
+                    def jobsToRun = []
                     if (triggerDev) {
-                        echo "Triggering Dev Pipeline..."
-                        build job: 'dev-pipeline'
+                        jobsToRun << 'dev-values1'
                     }
                     if (triggerSit) {
-                        echo "Triggering SIT Pipeline..."
-                        build job: 'sit-pipeline'
+                        jobsToRun << 'sit-pipeline'
                     }
                     if (triggerUat) {
-                        echo "Triggering UAT Pipeline..."
-                        build job: 'uat-pipeline'
+                        jobsToRun << 'uat-pipeline'
                     }
 
-                    // If no folder change detected
-                    if (!triggerDev && !triggerSit && !triggerUat) {
-                        echo "No folder-specific changes detected. No pipeline triggered."
+                    if (jobsToRun.size() > 0) {
+                        echo "Triggering jobs: ${jobsToRun}"
+                        jobsToRun.each { jobName ->
+                            build job: jobName, wait: true // Ensures execution completes
+                        }
+                    } else {
+                        echo "No relevant changes detected. Skipping job triggers."
                     }
                 }
             }
