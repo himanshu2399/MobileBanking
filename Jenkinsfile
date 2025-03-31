@@ -6,7 +6,7 @@ pipeline {
         GIT_CREDENTIALS = 'c73b6def-a6d6-470a-a790-99ae8825501b'
         GIT_BRANCH = 'main'
         TRIGGER_TOKEN = 'abc123'
-        SPARSE_CHECKOUT_PATH = 'dev-values/*'
+        SPARSE_CHECKOUT_PATH = 'dev-values/'
         FOLDER_NAME = 'dev-values/'
         REGEX_FILTER_EXPRESSION = "${GIT_BRANCH}\\s((.*\"(${FOLDER_NAME}/)[^\"]+?\").))"
     }
