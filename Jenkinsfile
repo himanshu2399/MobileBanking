@@ -1,11 +1,21 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'sit'], description: 'Choose the environment')
+    }
+
     environment {
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
         TRIGGER_TOKEN = 'abc123'
-        GIT_CREDENTIALS = 'c73b6def-a6d6-470a-a790-99ae8825501b'
+        
+        // Set folder paths dynamically based on environment selection
+        SPARSE_CHECKOUT_PATH = "${params.ENVIRONMENT}-values/*"
+        FOLDER_NAME = "${params.ENVIRONMENT}-values/"
+
+        // Regex to trigger based on folder changes
+        REGEX_FILTER_EXPRESSION = "${GIT_BRANCH}\\s((.*\"(${FOLDER_NAME}/)[^\"]+?\").))"
     }
 
     triggers {
@@ -19,57 +29,24 @@ pipeline {
             printContributedVariables: true,
             printPostContent: true,
             regexpFilterText: '$ref $changed_files',
-            regexpFilterExpression: 'main\\s((.*"(dev-values/|qa-values/)[^"]+?".))'
+            regexpFilterExpression: 'main\\s((.*"(${FOLDER_NAME})[^"]+?".))'
         )
     }
 
     stages {
-        stage('Detect Changes') {
+        stage('Checkout') {
             steps {
-                script {
-                    // Extract changed files from webhook
-                    def changes = env.changed_files.tokenize(',')
-                    def affectedFolders = []
-
-                    // Check if any files are changed in dev-values or qa-values
-                    if (changes.find { it.startsWith('dev-values/') }) {
-                        affectedFolders.add('dev-values/')
-                    }
-                    if (changes.find { it.startsWith('qa-values/') }) {
-                        affectedFolders.add('sit-values/')
-                    }
-
-                    // Store affected folders in an environment variable
-                    env.AFFECTED_FOLDERS = affectedFolders.join(',')
-                }
+                checkout([$class: 'GitSCM',
+                    branches: [[name: "*/${env.GIT_BRANCH}"]],
+                    userRemoteConfigs: [[credentialsId: env.GIT_CREDENTIALS, url: env.GIT_URL]],
+                    extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[path: env.SPARSE_CHECKOUT_PATH]]]]
+                ])
             }
         }
 
-        stage('Run Pipelines in Parallel') {
-            when {
-                expression { env.AFFECTED_FOLDERS != '' }
-            }
+        stage('Build') {
             steps {
-                script {
-                    def tasks = [:]
-                    def folders = env.AFFECTED_FOLDERS.tokenize(',')
-
-                    for (folder in folders) {
-                        tasks[folder] = {
-                            stage("Processing ${folder}") {
-                                checkout([$class: 'GitSCM',
-                                    branches: [[name: "*/${env.GIT_BRANCH}"]],
-                                    userRemoteConfigs: [[credentialsId: env.GIT_CREDENTIALS, url: env.GIT_URL]],
-                                    extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[path: "${folder}*"]]]]
-                                ])
-
-                                echo "Building for folder: ${folder}"
-                            }
-                        }
-                    }
-
-                    parallel tasks
-                }
+                echo "Running build for ${params.ENVIRONMENT} environment..."
             }
         }
     }
