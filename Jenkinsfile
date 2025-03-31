@@ -38,8 +38,8 @@ pipeline {
             steps {
                 script {
                     def MONITORED_FOLDERS = [
-                        'dev-values/' : 'dev-pipeline',
-                        'sit-values/' : 'sit-pipeline'
+                        'dev-values/*' : 'dev-pipeline',
+                        'sit-values/*' : 'sit-pipeline'
                     ]
 
                     def changedFiles = env.changed_files ? env.changed_files.tokenize(',') : []
