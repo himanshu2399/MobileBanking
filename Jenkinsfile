@@ -5,9 +5,9 @@ pipeline {
         GIT_CREDENTIALS = 'c73b6def-a6d6-470a-a790-99ae8825501b'
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
-        TRIGGER_TOKEN = 'abc123'
-        FOLDERS_TO_MONITOR = ['dev-values/', 'sit-values/'] // Define folders for separate jobs
-        REGEX_FILTER_EXPRESSION = "${GIT_BRANCH}\\s((.*\"(dev-values/|sit-values/)[^\"]+?\").))"
+        DEV_PIPELINE = 'dev-pipeline'
+        SIT_PIPELINE = 'sit-pipeline'
+        FOLDERS_TO_MONITOR = ['dev-folder', 'sit-folder']
     }
 
     triggers {
@@ -21,52 +21,76 @@ pipeline {
             printContributedVariables: true,
             printPostContent: true,
             regexpFilterText: '$ref $changed_files',
-            regexpFilterExpression: 'main\\s((.*"(dev-values/|sit-values/)[^"]+?".))'
+            regexpFilterExpression: 'your-git-branch-name\\s((.*"(dev-folder/|sit-folder/)[^"]+?".))'
         )
     }
 
     stages {
-        stage('Detect Changes') {
-            steps {
-                script {
-                    def changedFiles = env.changed_files.tokenize(',') // Convert string to list
-                    def triggeredJobs = []
-
-                    FOLDERS_TO_MONITOR.each { folder ->
-                        if (changedFiles.find { it.startsWith(folder + '/') }) {
-                            if (folder == 'dev-values/') {
-                                triggeredJobs << 'dev-pipeline'
-                            } else if (folder == 'sit-values/') {
-                                triggeredJobs << 'sit-pipeline'
-                            }
-                        }
-                    }
-
-                    if (triggeredJobs) {
-                        triggeredJobs.each { job ->
-                            build job: job, wait: false
-                        }
-                    }
-                }
-            }
-        }
-
         stage('Checkout') {
             steps {
                 script {
-                    def sparsePaths = FOLDERS_TO_MONITOR.collect { [path: it + "/*"] }
                     checkout([$class: 'GitSCM',
                         branches: [[name: "*/${env.GIT_BRANCH}"]],
                         userRemoteConfigs: [[credentialsId: env.GIT_CREDENTIALS, url: env.GIT_URL]],
-                        extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: sparsePaths]]
+                        extensions: []
                     ])
                 }
             }
         }
 
-        stage('Build') {
+        stage('Detect Changes') {
             steps {
-                echo "Building changes for ${FOLDERS_TO_MONITOR.join(', ')}"
+                script {
+                    def changedFiles = env.changed_files.tokenize(',')
+                    def triggeredJobs = []
+
+                    if (changedFiles.find { it.startsWith('dev-folder/') }) {
+                        triggeredJobs << env.DEV_PIPELINE
+                    }
+                    if (changedFiles.find { it.startsWith('sit-folder/') }) {
+                        triggeredJobs << env.SIT_PIPELINE
+                    }
+
+                    if (triggeredJobs.isEmpty()) {
+                        echo "No relevant folder changes detected. Skipping pipeline execution."
+                        currentBuild.result = 'ABORTED'
+                        return
+                    }
+
+                    echo "Triggering jobs: ${triggeredJobs}"
+                    env.TRIGGERED_JOBS = triggeredJobs.join(',')
+                }
+            }
+        }
+
+        stage('Trigger Jobs') {
+            when {
+                expression { return env.TRIGGERED_JOBS != null && env.TRIGGERED_JOBS != '' }
+            }
+            parallel {
+                stage('Trigger Dev Pipeline') {
+                    when {
+                        expression { return env.TRIGGERED_JOBS.contains(env.DEV_PIPELINE) }
+                    }
+                    steps {
+                        script {
+                            echo "Triggering ${env.DEV_PIPELINE}..."
+                            build job: env.DEV_PIPELINE, wait: false
+                        }
+                    }
+                }
+
+                stage('Trigger SIT Pipeline') {
+                    when {
+                        expression { return env.TRIGGERED_JOBS.contains(env.SIT_PIPELINE) }
+                    }
+                    steps {
+                        script {
+                            echo "Triggering ${env.SIT_PIPELINE}..."
+                            build job: env.SIT_PIPELINE, wait: false
+                        }
+                    }
+                }
             }
         }
     }
