@@ -1,20 +1,12 @@
 pipeline {
     agent any
 
-    parameters {
-        choice(name: 'ENVIRONMENT', choices: ['dev', 'sit'], description: 'Choose the environment')
-    }
-
     environment {
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
         TRIGGER_TOKEN = 'abc123'
-        
-        // Set folder paths dynamically based on environment selection
-        SPARSE_CHECKOUT_PATH = "${params.ENVIRONMENT}-values/*"
-        FOLDER_NAME = "${params.ENVIRONMENT}-values/"
-
-        // Regex to trigger based on folder changes
+        SPARSE_CHECKOUT_PATH = 'dev-values/*, sit-values/*,'
+        FOLDER_NAME = 'dev-values/, sit-values/'
         REGEX_FILTER_EXPRESSION = "${GIT_BRANCH}\\s((.*\"(${FOLDER_NAME}/)[^\"]+?\").))"
     }
 
@@ -29,7 +21,7 @@ pipeline {
             printContributedVariables: true,
             printPostContent: true,
             regexpFilterText: '$ref $changed_files',
-            regexpFilterExpression: 'main\\s((.*"(${FOLDER_NAME})[^"]+?".))'
+            regexpFilterExpression: 'main\\s((.*"(dev-values/)[^"]+?".))'
         )
     }
 
@@ -46,7 +38,9 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo "Running build for ${params.ENVIRONMENT} environment..."
+                // Add your build steps here
+                // For example, you can run a shell command or execute a build script
+               echo "Build is running...."
             }
         }
     }
