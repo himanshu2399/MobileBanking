@@ -8,7 +8,6 @@ pipeline {
         TRIGGER_TOKEN = 'abc123'
         SPARSE_CHECKOUT_PATH = 'dev-values/*'
         FOLDER_NAME = 'dev-values/'
-        REGEX_FILTER_EXPRESSION = "${GIT_BRANCH}\\s((.*\"(${FOLDER_NAME}/)[^\"]+?\").))"
     }
 
     triggers {
@@ -20,7 +19,6 @@ pipeline {
             causeString: 'Triggered on $ref $changed_files',
             token: 'abc123',
             regexpFilterText: '$ref $changed_files',
-            regexpFilterExpression: 'main\\s((.*"(dev-values/)[^"]+?".))'
         )
     }
 
@@ -37,7 +35,7 @@ pipeline {
 
         stage('Build') {
             steps {
-
+                
                 echo 'build is runinng.....'
                 // Add your build steps here
                 // For example, you can run a shell command or execute a build script
