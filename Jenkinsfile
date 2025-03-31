@@ -6,7 +6,7 @@ pipeline {
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
         MONITORED_FOLDERS = [
-            'dev-values/'      : 'dev-pipeline',
+            'dev-values/'     : 'dev-pipeline',
             'sit-values/'     : 'sit-pipeline',
         ]
     }
@@ -22,7 +22,7 @@ pipeline {
             printContributedVariables: true,
             printPostContent: true,
             regexpFilterText: '$ref $changed_files',
-            regexpFilterExpression: 'master\\s((.*"(dev-values/|sit-values|)[^"]+?".)|(."[^/"]+".*))'
+            regexpFilterExpression: 'main\\s((.*"(dev-values/|sit-values|)[^"]+?".)|(."[^/"]+".*))'
         )
     }
 
