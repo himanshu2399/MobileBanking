@@ -22,7 +22,7 @@ pipeline {
             printContributedVariables: true,
             printPostContent: true,
             regexpFilterText: '$ref $changed_files',
-            regexpFilterExpression: 'your-git-branch-name\\s((.*"(your-folder-name/)[^"]+?".))'
+            regexpFilterExpression: 'main\\s((.*"(dev-values/)[^"]+?".))'
         )
     }
 
