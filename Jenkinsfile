@@ -6,7 +6,7 @@ pipeline {
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
         TRIGGER_TOKEN = 'abc123'
-        FOLDERS_TO_MONITOR = ['dev-values', 'sit-values'] // Define folders for separate jobs
+        FOLDERS_TO_MONITOR = ['dev-values/', 'sit-values/'] // Define folders for separate jobs
         REGEX_FILTER_EXPRESSION = "${GIT_BRANCH}\\s((.*\"(dev-values/|sit-values/)[^\"]+?\").))"
     }
 
@@ -34,9 +34,9 @@ pipeline {
 
                     FOLDERS_TO_MONITOR.each { folder ->
                         if (changedFiles.find { it.startsWith(folder + '/') }) {
-                            if (folder == 'dev-values') {
+                            if (folder == 'dev-values/') {
                                 triggeredJobs << 'dev-pipeline'
-                            } else if (folder == 'sit-values') {
+                            } else if (folder == 'sit-values/') {
                                 triggeredJobs << 'sit-pipeline'
                             }
                         }
