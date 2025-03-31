@@ -5,8 +5,8 @@ pipeline {
         GIT_CREDENTIALS = 'c73b6def-a6d6-470a-a790-99ae8825501b'
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
-}
-    
+    }
+
     triggers {
         GenericTrigger(
             genericVariables: [
@@ -37,11 +37,12 @@ pipeline {
         stage('Trigger Jobs for Changed Folders') {
             steps {
                 script {
-                     MONITORED_FOLDERS = [
-                         'dev-values/'     : 'dev-pipeline',
-                         'sit-values/'     : 'sit-pipeline',
-        ] 
-                    def changedFiles = env.changed_files.tokenize(',')
+                    def MONITORED_FOLDERS = [
+                        'dev-values/' : 'dev-pipeline',
+                        'sit-values/' : 'sit-pipeline'
+                    ]
+
+                    def changedFiles = env.changed_files ? env.changed_files.tokenize(',') : []
                     def triggeredJobs = []
 
                     for (file in changedFiles) {
