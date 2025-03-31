@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
+        GIT_CREDENTIALS = 'c73b6def-a6d6-470a-a790-99ae8825501b'
         GIT_BRANCH = 'main'
         TRIGGER_TOKEN = 'abc123'
         SPARSE_CHECKOUT_PATH = 'dev-values/*'
