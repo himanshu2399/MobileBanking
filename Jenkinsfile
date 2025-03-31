@@ -19,8 +19,6 @@ pipeline {
             ],
             causeString: 'Triggered on $ref $changed_files',
             token: 'abc123',
-            printContributedVariables: true,
-            printPostContent: true,
             regexpFilterText: '$ref $changed_files',
             regexpFilterExpression: 'main\\s((.*"(dev-values/)[^"]+?".))'
         )
