@@ -5,8 +5,8 @@ pipeline {
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
         TRIGGER_TOKEN = 'abc123'
-        SPARSE_CHECKOUT_PATH = 'dev-values/*'
-        FOLDER_NAME = 'dev-values/'
+        SPARSE_CHECKOUT_PATH = 'dev-values/*, sit-values/*'
+        FOLDER_NAME = 'dev-values/, sit-values/'
         REGEX_FILTER_EXPRESSION = "${GIT_BRANCH}\\s((.*\"(${FOLDER_NAME}/)[^\"]+?\").))"
     }
 
@@ -21,7 +21,7 @@ pipeline {
             printContributedVariables: true,
             printPostContent: true,
             regexpFilterText: '$ref $changed_files',
-            regexpFilterExpression: 'main\\s((.*"(dev-values/)[^"]+?".))'
+            regexpFilterExpression: 'main\\s((.*"(dev-values//sit-values)[^"]+?".))'
         )
     }
 
