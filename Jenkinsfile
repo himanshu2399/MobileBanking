@@ -6,8 +6,8 @@ pipeline {
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
         MONITORED_FOLDERS = [
-            'books/'      : 'dev-pipeline',
-            'common/'     : 'sit-pipeline',
+            'dev-values/'      : 'dev-pipeline',
+            'sit-values/'     : 'sit-pipeline',
         ]
     }
 
