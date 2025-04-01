@@ -9,19 +9,6 @@ pipeline {
         SPARSE_CHECKOUT_PATH = 'dev-values/*'
         FOLDER_NAME = 'dev-values/'
     }
-
-    triggers {
-        GenericTrigger(
-            genericVariables: [
-                [key: 'changed_files', value: '$.commits[*].["modified","added","removed"][*]', expressionType: 'JSONPath'],
-                [key: 'ref', value: '$.ref', expressionType: 'JSONPath', regexpFilter: '^(refs/heads/|refs/remotes/origin/)']
-            ],
-            causeString: 'Triggered on $ref $changed_files',
-            token: 'abc123',
-            regexpFilterText: '$ref $changed_files',
-        )
-    }
-
     stages {
         stage('Checkout') {
             steps {
