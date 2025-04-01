@@ -12,9 +12,9 @@ pipeline {
     triggers {
         GenericTrigger(
             genericVariables: [
-                [key: 'changed_files', value: '$.commits[*].modified[*]', expressionType: 'JSONPath'],
-                [key: 'added_files', value: '$.commits[*].added[*]', expressionType: 'JSONPath'],
-                [key: 'removed_files', value: '$.commits[*].removed[*]', expressionType: 'JSONPath'],
+                [key: 'changed_files', value: '$.commits[*].modified[*]', expressionType: 'JSONPath', defaultValue: '[]'],
+                [key: 'added_files', value: '$.commits[*].added[*]', expressionType: 'JSONPath', defaultValue: '[]'],
+                [key: 'removed_files', value: '$.commits[*].removed[*]', expressionType: 'JSONPath', defaultValue: '[]'],
                 [key: 'ref', value: '$.ref', expressionType: 'JSONPath']
             ],
             causeString: 'Triggered on branch $ref with changes in $changed_files, $added_files, $removed_files',
@@ -22,7 +22,7 @@ pipeline {
             printContributedVariables: true,
             printPostContent: true,
             regexpFilterText: '$ref $changed_files $added_files $removed_files',
-            regexpFilterExpression: "main\\s.*(dev-values|sit-values)/.*"
+            regexpFilterExpression: "refs/heads/main\\s.*(dev-values|sit-values)/.*"
         )
     }
 
@@ -30,9 +30,16 @@ pipeline {
         stage('Determine Pipeline') {
             steps {
                 script {
-                    def changedFiles = "${env.changed_files} ${env.added_files} ${env.removed_files}" 
-                    echo "Extracted changed files: ${changedFiles}"
+                    // Print extracted variables for debugging
+                    echo "Branch: ${env.ref}"
+                    echo "Modified Files: ${env.changed_files}"
+                    echo "Added Files: ${env.added_files}"
+                    echo "Removed Files: ${env.removed_files}"
 
+                    // Combine all changed files into a single string
+                    def changedFiles = "${env.changed_files} ${env.added_files} ${env.removed_files}" 
+                    
+                    // Check if specific folders were modified
                     def runDevPipeline = changedFiles.contains("${DEV_FOLDER}/")
                     def runSitPipeline = changedFiles.contains("${SIT_FOLDER}/")
 
