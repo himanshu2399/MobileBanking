@@ -30,7 +30,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo "Environment Variables:"               
-                env.each { key, value ->                    
+                environment.each { key, value ->                    
                     echo "${key} = ${value}"                
                 }
                 script {
