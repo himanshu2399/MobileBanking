@@ -1,38 +1,41 @@
 pipeline {
     agent any
+
     stages {
-        stage('Check Changes') {
+        stage('Check for Changes') {
             steps {
                 script {
-                    // Check for changes in dev-values folder
-                    def devChanges = sh(
-                        script: "git diff --name-only HEAD~1 HEAD | grep '^dev-values/' || true",
-                        returnStatus: true
-                    ) == 0
-                    
-                    // Check for changes in sit-values folder
-                    def sitChanges = sh(
-                        script: "git diff --name-only HEAD~1 HEAD | grep '^sit-values/' || true",
-                        returnStatus: true
-                    ) == 0
+                    def changedFilesDev = sh(script: 'git diff --name-only HEAD~1 HEAD -- dev-values', returnStdout: true).trim()
+                    def changedFilesSit = sh(script: 'git diff --name-only HEAD~1 HEAD -- sit-values', returnStdout: true).trim()
 
-                    // Trigger dev-pipeline if dev-values folder has changes
-                    if (devChanges) {
-                        echo "Changes detected in dev-values folder. Triggering dev-pipeline..."
-                        build job: 'dev-pipeline'
-                    }
+                    env.TRIGGER_DEV = !changedFilesDev.isEmpty()
+                    env.TRIGGER_SIT = !changedFilesSit.isEmpty()
 
-                    // Trigger sit-pipeline if sit-values folder has changes
-                    if (sitChanges) {
-                        echo "Changes detected in sit-values folder. Triggering sit-pipeline..."
-                        build job: 'sit-pipeline'
-                    }
-
-                    // No relevant changes detected
-                    if (!devChanges && !sitChanges) {
-                        echo "No relevant changes detected. No pipelines triggered."
-                    }
+                    echo "Changes in dev-values: ${env.TRIGGER_DEV}"
+                    echo "Changes in sit-values: ${env.TRIGGER_SIT}"
                 }
+            }
+        }
+
+        stage('Trigger Dev Pipeline') {
+            when {
+                environment name: 'TRIGGER_DEV', value: 'true'
+            }
+            steps {
+                echo 'Changes detected in dev-values. Triggering dev-pipeline...'
+                // Replace with the actual trigger command or Jenkins job name
+                build job: 'dev-pipeline'
+            }
+        }
+
+        stage('Trigger Sit Pipeline') {
+            when {
+                environment name: 'TRIGGER_SIT', value: 'true'
+            }
+            steps {
+                echo 'Changes detected in sit-values. Triggering sit-pipeline...'
+                // Replace with the actual trigger command or Jenkins job name
+                build job: 'sit-pipeline'
             }
         }
     }
