@@ -4,5 +4,5 @@ metadata:
   name: service-a-config
   namespace: dev-values
 data:
-  app_name: "mb-app"
+  app_name: "mb-app"vsdv
   log_level: "INFO"
