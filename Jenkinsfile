@@ -5,8 +5,8 @@ pipeline {
         GIT_CREDENTIALS = 'c73b6def-a6d6-470a-a790-99ae8825501b' 
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
-        DEV_FOLDER = 'dev-values'
-        SIT_FOLDER = 'sit-values'
+        DEV_FOLDER = 'dev-values/'
+        SIT_FOLDER = 'sit-values/'
     }
 
     triggers {
