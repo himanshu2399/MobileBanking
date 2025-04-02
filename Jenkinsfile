@@ -5,8 +5,8 @@ pipeline {
         GIT_CREDENTIALS = 'c73b6def-a6d6-470a-a790-99ae8825501b' 
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
-        DEV_FOLDER = 'dev-values/'
-        SIT_FOLDER = 'sit-values/'
+        DEV_FOLDER = 'dev-values'
+        SIT_FOLDER = 'sit-values'
     }
 
     triggers {
@@ -36,12 +36,18 @@ pipeline {
                     echo "Added Files: ${env.added_files}"
                     echo "Removed Files: ${env.removed_files}"
 
-                    // Combine all changed files into a single string
-                    def changedFiles = "${env.changed_files} ${env.added_files} ${env.removed_files}" 
+                    // Convert JSON arrays to Groovy lists
+                    def modifiedFiles = env.changed_files.tokenize(',')
+                    def addedFiles = env.added_files.tokenize(',')
+                    def removedFiles = env.removed_files.tokenize(',')
                     
-                    // Check if specific folders were modified
-                    def runDevPipeline = changedFiles.contains("${DEV_FOLDER}/")
-                    def runSitPipeline = changedFiles.contains("${SIT_FOLDER}/")
+                    // Combine all changed files into a list
+                    def allChangedFiles = modifiedFiles + addedFiles + removedFiles
+                    echo "All Changed Files: ${allChangedFiles}"
+
+                    // Check if dev-values or sit-values were modified
+                    def runDevPipeline = allChangedFiles.any { it.trim().startsWith("${DEV_FOLDER}/") }
+                    def runSitPipeline = allChangedFiles.any { it.trim().startsWith("${SIT_FOLDER}/") }
 
                     if (!runDevPipeline && !runSitPipeline) {
                         echo "No relevant changes detected. Skipping pipeline execution."
