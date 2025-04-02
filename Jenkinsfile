@@ -34,6 +34,7 @@ pipeline {
                         branches: [[name: "*/${env.GIT_BRANCH}"]],
                         userRemoteConfigs: [[credentialsId: env.GIT_CREDENTIALS, url: env.GIT_URL]]
                     ])
+                    echo '$REGEX_FILTER_EXPRESSION'
                 }
                 checkout([$class: 'GitSCM',
                     branches: [[name: "*/${env.GIT_BRANCH}"]],
