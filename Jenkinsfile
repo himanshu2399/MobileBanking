@@ -22,6 +22,7 @@ pipeline {
 
         stage('Build') {
             steps {
+                echo 'building the job.....'
                 // Add your build steps here
                 // For example, you can run a shell command or execute a build script
                
