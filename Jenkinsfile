@@ -29,12 +29,16 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                echo "Environment Variables:"               
+                env.each { key, value ->                    
+                    echo "${key} = ${value}"                
+                }
                 script {
                     checkout([$class: 'GitSCM',
                         branches: [[name: "*/${env.GIT_BRANCH}"]],
                         userRemoteConfigs: [[credentialsId: env.GIT_CREDENTIALS, url: env.GIT_URL]]
                     ])
-                    sh 'printenv'
+    
                 }
                 checkout([$class: 'GitSCM',
                     branches: [[name: "*/${env.GIT_BRANCH}"]],
