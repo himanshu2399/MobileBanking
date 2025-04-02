@@ -5,8 +5,7 @@
          SPARSE_CHECKOUT_PATH = 'dev-values/*'
          FOLDER_NAME = 'dev-values/'
          REGEX_FILTER_EXPRESSION = "${GIT_BRANCH}\\s((.*\"(${FOLDER_NAME}/)[^\"]+?\").))"
-     }
- 
+     
      triggers {
          GenericTrigger(
              genericVariables: [
