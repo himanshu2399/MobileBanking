@@ -7,8 +7,6 @@ pipeline {
         GIT_BRANCH = 'main'
         TRIGGER_TOKEN = 'abc123'
         SPARSE_CHECKOUT_PATH = 'dev-values/*'
-        FOLDER_NAME = 'dev-values'
-        REGEX_FILTER_EXPRESSION = "${GIT_BRANCH}\\s((.*\"(${FOLDER_NAME}/)[^\"]+?\").))"
     }
 
     triggers {
@@ -22,7 +20,6 @@ pipeline {
             printContributedVariables: true,
             printPostContent: true,
             regexpFilterText: '$ref $changed_files',
-            regexpFilterExpression: 'main\\s((.*"(dev-values/)[^"]+?".))'
         )
     }
 
