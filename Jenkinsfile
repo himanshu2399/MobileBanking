@@ -30,24 +30,24 @@ pipeline {
         stage('Determine Pipeline') {
             steps {
                 script {
-                    // Print extracted variables for debugging
+                    // Debugging information
                     echo "Branch: ${env.ref}"
                     echo "Modified Files: ${env.changed_files}"
                     echo "Added Files: ${env.added_files}"
                     echo "Removed Files: ${env.removed_files}"
 
-                    // Convert JSON arrays to Groovy lists
-                    def modifiedFiles = env.changed_files.tokenize(',')
-                    def addedFiles = env.added_files.tokenize(',')
-                    def removedFiles = env.removed_files.tokenize(',')
-                    
+                    // Parse JSON strings into Groovy lists
+                    def modifiedFiles = env.changed_files && env.changed_files != '[]' ? readJSON(text: env.changed_files) : []
+                    def addedFiles = env.added_files && env.added_files != '[]' ? readJSON(text: env.added_files) : []
+                    def removedFiles = env.removed_files && env.removed_files != '[]' ? readJSON(text: env.removed_files) : []
+
                     // Combine all changed files into a list
                     def allChangedFiles = modifiedFiles + addedFiles + removedFiles
                     echo "All Changed Files: ${allChangedFiles}"
 
-                    // Check if dev-values or sit-values were modified
-                    def runDevPipeline = allChangedFiles.any { it.trim().startsWith("${DEV_FOLDER}/") }
-                    def runSitPipeline = allChangedFiles.any { it.trim().startsWith("${SIT_FOLDER}/") }
+                    // Check if any files in dev-values or sit-values changed
+                    def runDevPipeline = allChangedFiles.any { it.startsWith("${DEV_FOLDER}/") }
+                    def runSitPipeline = allChangedFiles.any { it.startsWith("${SIT_FOLDER}/") }
 
                     if (!runDevPipeline && !runSitPipeline) {
                         echo "No relevant changes detected. Skipping pipeline execution."
