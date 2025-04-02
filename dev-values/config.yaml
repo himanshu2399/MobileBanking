@@ -1,4 +1,4 @@
-apiVersion: v2.0
+apiVersion: v2.0ffg
 kind: ConfigMap
 metadata:
   name: service-a-config
