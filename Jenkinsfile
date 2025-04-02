@@ -6,32 +6,32 @@ pipeline {
     }
 
     stages {
+        stage('Debugging') {
+            steps {
+                script {
+                    echo "Received changed files: ${CHANGED_FILES}"
+                }
+            }
+        }
+
         stage('Trigger Check') {
             steps {
                 script {
                     def changedFiles = CHANGED_FILES.tokenize(",")
-                    def regex = ~/dev-values\/.+/
+                    def regex = ~/^dev-values\/.+/
+
+                    echo "Checking files against regex: ${regex}"
 
                     def triggerJob = changedFiles.any { it ==~ regex }
 
                     if (triggerJob) {
-                        echo "Job triggered as matching files were found!"
+                        echo "Job triggered!"
                     } else {
                         echo "No matching files found. Job will not proceed."
                         currentBuild.result = 'NOT_BUILT'
                         error("Stopping build as no matching files were found.")
                     }
                 }
-            }
-        }
-
-        stage('Build and Deploy') {
-            when {
-                expression { currentBuild.result != 'NOT_BUILT' }
-            }
-            steps {
-                echo "Proceeding with the pipeline execution..."
-                // Add your build or deployment steps here
             }
         }
     }
