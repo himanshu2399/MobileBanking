@@ -1,40 +1,53 @@
 pipeline {
     agent any
 
+    triggers {
+        github(secretId: 'c73b6def-a6d6-470a-a790-99ae8825501b',
+               branchFilter: 'main', // Adjust your branch filter as needed
+               fileFilter: 'dev-values/(.*)|sit-values/(.*)')
+    }
+
     stages {
-        stage('Check for Changes') {
+        stage('Determine Triggered Pipeline') {
+            when {
+                anyOf {
+                    triggered 'github', filePattern: 'dev-values/(.*)'
+                    triggered 'github', filePattern: 'sit-values/(.*)'
+                }
+            }
             steps {
                 script {
-                    def changedFilesDev = sh(script: 'git diff --name-only HEAD~1 HEAD -- dev-values', returnStdout: true).trim()
-                    def changedFilesSit = sh(script: 'git diff --name-only HEAD~1 HEAD -- sit-values', returnStdout: true).trim()
-
-                    env.TRIGGER_DEV = !changedFilesDev.isEmpty()
-                    env.TRIGGER_SIT = !changedFilesSit.isEmpty()
-
-                    echo "Changes in dev-values: ${env.TRIGGER_DEV}"
-                    echo "Changes in sit-values: ${env.TRIGGER_SIT}"
+                    if (currentBuild.rawBuild.getCauses().any { it instanceof hudson.triggers.SCMTrigger.SCMTriggerCause && it.getChangeLog().getAffectedFiles().any { it.getPath().startsWith('dev-values/') } }) {
+                        env.TRIGGERED_FOLDER = 'dev-values'
+                        echo "Changes detected in dev-values."
+                    } else if (currentBuild.rawBuild.getCauses().any { it instanceof hudson.triggers.SCMTrigger.SCMTriggerCause && it.getChangeLog().getAffectedFiles().any { it.getPath().startsWith('sit-values/') } }) {
+                        env.TRIGGERED_FOLDER = 'sit-values'
+                        echo "Changes detected in sit-values."
+                    } else {
+                        echo "No relevant changes detected."
+                        // Optionally, you could abort the build here if no relevant changes are found
+                        // error("No relevant changes detected.")
+                    }
                 }
             }
         }
 
         stage('Trigger Dev Pipeline') {
             when {
-                environment name: 'TRIGGER_DEV', value: 'true'
+                environment name: 'TRIGGERED_FOLDER', value: 'dev-values'
             }
             steps {
-                echo 'Changes detected in dev-values. Triggering dev-pipeline...'
-                // Replace with the actual trigger command or Jenkins job name
+                echo 'Triggering dev-pipeline...'
                 build job: 'dev-pipeline'
             }
         }
 
         stage('Trigger Sit Pipeline') {
             when {
-                environment name: 'TRIGGER_SIT', value: 'true'
+                environment name: 'TRIGGERED_FOLDER', value: 'sit-values'
             }
             steps {
-                echo 'Changes detected in sit-values. Triggering sit-pipeline...'
-                // Replace with the actual trigger command or Jenkins job name
+                echo 'Triggering sit-pipeline...'
                 build job: 'sit-pipeline'
             }
         }
