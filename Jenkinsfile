@@ -6,7 +6,7 @@ pipeline {
         GIT_URL = 'https://github.com/himanshu2399/MobileBanking.git'
         GIT_BRANCH = 'main'
         TRIGGER_TOKEN = 'abc123'
-        SPARSE_CHECKOUT_PATH = 'dev-values/*'
+        SPARSE_CHECKOUT_PATH = 'dev-values/* sit-values/*'
     }
 
     stages {
