@@ -2,7 +2,7 @@ apiVersion: v2.0
 kind: ConfigMap
 metadata:
   name: service-a-config
-  namespace: sit-values
+  namespace: sit-valuesokok
 data:
   app_name: "mb-app"
   log_level: "INFO"
