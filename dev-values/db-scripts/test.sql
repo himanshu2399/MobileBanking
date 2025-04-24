@@ -10,7 +10,7 @@ CREATE TABLE employees (
 );
 
 INSERT INTO employees (name, department, salary, hire_date) VALUES
-('John Doe', 'Engineering', 75000.00, '2023-01-15'),
+('John', 'Engineering', 75000.00, '2023-01-15'),
 ('Jane Smith', 'HR', 60000.00, '2022-09-23');
 
 SELECT * FROM employees;
