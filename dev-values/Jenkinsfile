@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    environment {
+        ENV_NAME = "${env.JOB_NAME.contains('dev-values') ? 'dev' : (env.JOB_NAME.contains('sit-values') ? 'sit' : 'uat')}"
+        BRANCH_NAME = "${env.BRANCH_NAME}"
+    }
+
+    stages {
+        stage('Init') {
+            steps {
+                echo "Environment: ${ENV_NAME}"
+                echo "Branch: ${BRANCH_NAME}"
+                script {
+                    echo "Running pipeline for ${ENV_NAME} in branch ${BRANCH_NAME}"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo "Simulate deploying to ${ENV_NAME} for branch ${BRANCH_NAME}"
+                // You can call helm, kubectl, or run scripts here
+                // Example:
+                // sh "helm upgrade --install myapp-${ENV_NAME} ./charts/myapp -f ${ENV_NAME}-values/values.yaml"
+            }
+        }
+    }
+}
