@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'alpine/git' // lightweight image with Git and sh
+            args '-u root:root' // optional: ensures root access for file ops if needed
+        }
+    }
 
     environment {
         RUN_DEV = 'false'
@@ -17,10 +22,9 @@ pipeline {
         stage('Detect Changes') {
             steps {
                 script {
-                    // Assume you're diffing against origin/main for simplicity
                     def baseBranch = "origin/main"
 
-                    // Fetch base branch to compare against
+                    // Fetch the base branch to compare against
                     sh "git fetch origin main"
 
                     // List changed files between this branch and main
