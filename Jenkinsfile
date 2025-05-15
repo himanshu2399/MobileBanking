@@ -17,7 +17,7 @@ pipeline {
         stage('Detect Changes') {
             steps {
                 script {
-                    def baseBranch = "origin/main"
+                    def baseBranch = "FETCH_HEAD"
 
                     // Fetch main branch
                     bat "git fetch origin main"
