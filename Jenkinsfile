@@ -17,56 +17,51 @@ pipeline {
         stage('Detect Changes') {
             steps {
                 script {
-                    def baseBranch = "FETCH_HEAD"
-
-                    // Fetch main branch
+                    def baseBranch = "origin/main"
                     bat "git fetch origin main"
+                    def changedFiles = bat(
+                        script: "git diff --name-only ${baseBranch}...HEAD > changed_files.txt",
+                        returnStatus: true
+                    )
 
-                    // Get changed files using bat and write output to a file
-                    bat "git diff --name-only ${baseBranch}...HEAD > changed_files.txt"
+                    def content = readFile('changed_files.txt').trim().split("\n")
+                    echo "Changed files:\n${content.join('\n')}"
 
-                    // Read file and split lines
-                    def changedFilesRaw = readFile('changed_files.txt')
-                    def changedFiles = changedFilesRaw.readLines()
-
-                    echo "Changed files:\n${changedFiles.join('\n')}"
-
-                    env.RUN_DEV = changedFiles.any { it.startsWith('dev-values/') }.toString()
-                    env.RUN_SIT = changedFiles.any { it.startsWith('sit-values/') }.toString()
-                    env.RUN_UAT = changedFiles.any { it.startsWith('uat-values/') }.toString()
-
-                    echo "Run Dev: ${env.RUN_DEV}, Run SIT: ${env.RUN_SIT}, Run UAT: ${env.RUN_UAT}"
+                    env.RUN_DEV = content.any { it.startsWith('dev-values/') }.toString()
+                    env.RUN_SIT = content.any { it.startsWith('sit-values/') }.toString()
+                    env.RUN_UAT = content.any { it.startsWith('uat-values/') }.toString()
                 }
             }
         }
 
         stage('Run Dev Pipeline') {
             when {
-                expression { Boolean.parseBoolean(env.RUN_DEV) }
+                expression { env.RUN_DEV == 'true' }
             }
             steps {
-                echo "Running dev pipeline logic"
-                // Add dev steps here
+                echo "Running Dev pipeline logic"
+                bat 'echo Deploying dev...'
+                // bat 'kubectl apply -f dev-values/'
             }
         }
 
         stage('Run SIT Pipeline') {
             when {
-                expression { Boolean.parseBoolean(env.RUN_SIT) }
+                expression { env.RUN_SIT == 'true' }
             }
             steps {
-                echo "Running sit pipeline logic"
-                // Add sit steps here
+                echo "Running SIT pipeline logic"
+                bat 'echo Deploying SIT...'
             }
         }
 
         stage('Run UAT Pipeline') {
             when {
-                expression { Boolean.parseBoolean(env.RUN_UAT) }
+                expression { env.RUN_UAT == 'true' }
             }
             steps {
-                echo "Running uat pipeline logic"
-                // Add uat steps here
+                echo "Running UAT pipeline logic"
+                bat 'echo Deploying UAT...'
             }
         }
     }
