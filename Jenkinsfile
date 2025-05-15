@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'alpine/git' // lightweight image with Git and sh
-            args '-u root:root' // optional: ensures root access for file ops if needed
-        }
-    }
+    agent any
 
     environment {
         RUN_DEV = 'false'
@@ -24,14 +19,15 @@ pipeline {
                 script {
                     def baseBranch = "origin/main"
 
-                    // Fetch the base branch to compare against
-                    sh "git fetch origin main"
+                    // Fetch main branch
+                    bat "git fetch origin main"
 
-                    // List changed files between this branch and main
-                    def changedFiles = sh(
-                        script: "git diff --name-only ${baseBranch}...HEAD",
-                        returnStdout: true
-                    ).trim().split('\n')
+                    // Get changed files using bat and write output to a file
+                    bat "git diff --name-only ${baseBranch}...HEAD > changed_files.txt"
+
+                    // Read file and split lines
+                    def changedFilesRaw = readFile('changed_files.txt')
+                    def changedFiles = changedFilesRaw.readLines()
 
                     echo "Changed files:\n${changedFiles.join('\n')}"
 
@@ -50,6 +46,7 @@ pipeline {
             }
             steps {
                 echo "Running dev pipeline logic"
+                // Add dev steps here
             }
         }
 
@@ -59,6 +56,7 @@ pipeline {
             }
             steps {
                 echo "Running sit pipeline logic"
+                // Add sit steps here
             }
         }
 
@@ -68,6 +66,7 @@ pipeline {
             }
             steps {
                 echo "Running uat pipeline logic"
+                // Add uat steps here
             }
         }
     }
